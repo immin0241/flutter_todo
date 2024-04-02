@@ -20,10 +20,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class TodoApplication extends StatelessWidget {
+class TodoApplication extends StatefulWidget {
   const TodoApplication({super.key, required this.title});
 
   final String title;
+
+  @override
+  State<TodoApplication> createState() => _TodoApplicationState();
+}
+
+class _TodoApplicationState extends State<TodoApplication> {
+  List<Map<String, dynamic>> todoItems = [];
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +38,7 @@ class TodoApplication extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text(
-          title,
+          widget.title,
           style: TextStyle(color: Colors.white),
         ),
       ),
@@ -46,34 +53,44 @@ class TodoApplication extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text("옷 사가기"),
-                      IconButton(
-                        onPressed: () => {},
-                        icon: Icon(Icons.delete_forever),
-                      )
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text("빨래하기"),
-                      IconButton(
-                        onPressed: () => {},
-                        icon: Icon(Icons.delete_forever),
-                      )
-                    ],
-                  ),
+                  TodoItem(content: "ads", isDone: false),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class TodoItem extends StatelessWidget {
+  const TodoItem({
+    super.key,
+    required this.content,
+    required this.isDone,
+  });
+
+  final String content;
+  final bool isDone;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle ts = TextStyle(
+      decoration: (isDone ? TextDecoration.lineThrough : TextDecoration.none),
+      color: isDone ? Colors.grey : Colors.black,
+    );
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(content, style: ts),
+        IconButton(
+          onPressed: () => {},
+          icon: Icon(Icons.delete_forever),
+        )
+      ],
     );
   }
 }
