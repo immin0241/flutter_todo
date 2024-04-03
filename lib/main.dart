@@ -145,6 +145,7 @@ class TodoInput extends StatelessWidget {
       children: [
         Expanded(
           child: TextField(
+            onSubmitted: (content) => onSubmit(_textController.text),
             controller: _textController,
             decoration: InputDecoration(border: OutlineInputBorder()),
           ),
