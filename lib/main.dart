@@ -1,6 +1,12 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter_todo/database.dart';
+
+late AppDatabase db;
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  db = AppDatabase();
   runApp(const MyApp());
 }
 
@@ -30,31 +36,35 @@ class TodoApplication extends StatefulWidget {
 }
 
 class _TodoApplicationState extends State<TodoApplication> {
-  List<Map<String, dynamic>> todoItems = [];
+  late List<TodoItem> todoItems = [];
   int counter = 0;
 
-  void submitHandler(value) {
+  @override
+  void initState() {
+    super.initState();
+    refreshList();
+  }
+
+  void refreshList() async {
+    var tmp = await db.allTodoItems;
     setState(() {
-      todoItems.add({
-        "idx": counter++,
-        "content": value,
-        "isDone": false,
-      });
+      todoItems = tmp;
     });
   }
 
-  void toggleHandler(idx) {
-    int target = todoItems.indexWhere((element) => element['idx'] == idx);
-    setState(() {
-      todoItems[target]['isDone'] = !todoItems[target]['isDone'];
-    });
+  void submitHandler(value) async {
+    await db.addTodo(TodoItemsCompanion(content: Value(value)));
+    refreshList();
   }
 
-  void deleteHandler(idx) {
-    Map target = todoItems.firstWhere((element) => element['idx'] == idx);
-    setState(() {
-      todoItems.remove(target);
-    });
+  void toggleHandler(idx) async {
+    await db.flipTodoDoneStatus(idx);
+    refreshList();
+  }
+
+  void deleteHandler(idx) async {
+    await db.delTodo(idx);
+    refreshList();
   }
 
   @override
@@ -79,11 +89,11 @@ class _TodoApplicationState extends State<TodoApplication> {
               child: ListView.builder(
                 itemCount: todoItems.length,
                 itemBuilder: (ctx, idx) {
-                  Map i = todoItems[idx];
-                  return TodoItem(
-                    idx: i['idx'],
-                    content: i['content'],
-                    isDone: i['isDone'],
+                  TodoItem i = todoItems[idx];
+                  return TodoListItem(
+                    idx: i.idx,
+                    content: i.content,
+                    isDone: i.isDone,
                     onToggle: toggleHandler,
                     onDelete: deleteHandler,
                   );
@@ -97,8 +107,8 @@ class _TodoApplicationState extends State<TodoApplication> {
   }
 }
 
-class TodoItem extends StatelessWidget {
-  const TodoItem({
+class TodoListItem extends StatelessWidget {
+  const TodoListItem({
     super.key,
     required this.idx,
     required this.content,
